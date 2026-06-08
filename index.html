@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light" data-lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CodeLens-AI - Intelligent Code Review & Quality Analysis Dashboard">
+  <meta name="theme-color" content="#6366f1">
+  <title>CodeLens-AI - Code Review & Quality Analysis</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <a href="#" class="logo">
+        <div class="logo-icon">CL</div>
+        <span class="logo-text" id="logoText">CodeLens-AI</span>
+      </a>
+      <span style="font-size:13px;color:var(--text-muted)" id="taglineText"></span>
+    </div>
+    <div class="header-right">
+      <button class="btn btn-icon tooltip" id="themeBtn" data-tooltip="Dark Mode">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+      <div class="lang-dropdown">
+        <button class="btn" id="langBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+          <span class="btn-text">Language</span>
+        </button>
+        <div class="lang-menu" id="langMenu">
+          <button class="lang-menu-item active" data-lang="zh-CN">简体中文</button>
+          <button class="lang-menu-item" data-lang="zh-TW">繁體中文</button>
+          <button class="lang-menu-item" data-lang="en">English</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-container">
+
+    <!-- Input Section -->
+    <section class="input-section">
+      <div class="input-section-header">
+        <div class="input-section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          <span id="inputTitle">Paste Code</span>
+          <span class="lang-badge unknown" id="langBadge">Unknown</span>
+        </div>
+        <div class="input-actions">
+          <button class="btn" id="uploadBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            <span class="btn-text">Upload File</span>
+          </button>
+          <input type="file" id="fileInput" accept=".js,.jsx,.ts,.tsx,.py,.go,.rs,.java,.cpp,.cc,.cxx,.hpp,.h,.css,.html,.htm,.json,.yml,.yaml,.sql,.sh,.bash,.php,.rb,.swift,.kt,.kts" style="display:none">
+          <button class="btn btn-primary" id="analyzeBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span class="btn-text">Analyze</span>
+          </button>
+          <button class="btn" id="clearBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+            <span class="btn-text">Clear</span>
+          </button>
+        </div>
+      </div>
+      <div class="code-editor-wrapper">
+        <textarea
+          class="code-editor"
+          id="codeEditor"
+          placeholder="Paste code here, or drag & drop a file..."
+          spellcheck="false"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+        ></textarea>
+        <div class="drop-overlay">
+          <div class="drop-overlay-content">
+            <div class="drop-overlay-icon">&#128194;</div>
+            <div class="drop-overlay-text">Drop files here</div>
+          </div>
+        </div>
+        <div class="code-editor-footer">
+          <span><span id="lineCount">0</span> lines</span>
+          <span class="char-count"><span id="charCount">0</span> chars</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Section -->
+    <section class="results-section" id="resultsSection">
+
+      <!-- Summary Cards -->
+      <div class="summary-row">
+        <div class="summary-card">
+          <div class="summary-card-value" id="overallScore">--</div>
+          <div class="summary-card-label" id="overallLabel">Overall Score</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-value" id="securityScore">--</div>
+          <div class="summary-card-label" id="securityLabel">Security</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-value" id="qualityScore">--</div>
+          <div class="summary-card-label" id="qualityLabel">Quality</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-value" id="complexityScore">--</div>
+          <div class="summary-card-label" id="complexityLabel">Complexity</div>
+        </div>
+      </div>
+
+      <!-- Charts Grid -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            <span id="scoreChartTitle">Score Overview</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="scoreRingCanvas"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><line x1="12" y1="22" x2="12" y2="15.5"/><polyline points="22 8.5 12 15.5 2 8.5"/></svg>
+            <span id="radarChartTitle">Dimension Analysis</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="radarCanvas"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/></svg>
+            <span id="pieChartTitle">Issue Distribution</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="pieCanvas"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+            <span id="bestPracticeChartTitle">Best Practices</span>
+          </div>
+          <div class="chart-container" style="flex-direction:column;align-items:flex-start;padding:16px">
+            <div style="display:flex;align-items:center;gap:12px;width:100%;margin-bottom:16px">
+              <span style="font-size:14px;color:var(--text-tertiary);flex:1" id="bestPracticeLabel">Best Practices Score</span>
+              <span style="font-size:28px;font-weight:700" class="text-gradient" id="bestPracticeScore">--</span>
+            </div>
+            <div style="width:100%;height:12px;background:var(--bg-tertiary);border-radius:6px;overflow:hidden">
+              <div id="bestPracticeBar" style="height:100%;width:0%;background:var(--gradient-primary);border-radius:6px;transition:width 0.8s ease"></div>
+            </div>
+            <div style="margin-top:20px;width:100%;display:flex;flex-direction:column;gap:8px" id="bestPracticeDetails"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Issues Section -->
+      <div class="issues-section">
+        <div class="issues-header">
+          <div class="issues-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span id="issuesTitle">Issues List</span>
+            <span style="font-size:13px;color:var(--text-muted);font-weight:400" id="issuesCount">0 issues</span>
+          </div>
+          <div class="issues-controls">
+            <input type="text" class="issues-search" id="issuesSearch" placeholder="Search issues...">
+            <div class="filter-chips">
+              <button class="filter-chip active" data-filter="all">All</button>
+              <button class="filter-chip" data-filter="critical">Critical</button>
+              <button class="filter-chip" data-filter="high">High</button>
+              <button class="filter-chip" data-filter="medium">Medium</button>
+              <button class="filter-chip" data-filter="low">Low</button>
+              <button class="filter-chip" data-filter="info">Info</button>
+            </div>
+          </div>
+        </div>
+        <div class="issues-list" id="issuesList">
+          <div class="no-issues">
+            <div class="no-issues-icon">&#128269;</div>
+            <div class="no-issues-text">No Issues Found</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Export Button -->
+      <div style="display:flex;justify-content:center;margin-top:8px">
+        <button class="btn btn-primary" id="exportBtn" style="padding:12px 32px;font-size:15px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          <span class="btn-text">Export Report</span>
+        </button>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>CodeLens-AI v1.0.0 | MIT License | Pure Frontend, No API Calls</p>
+  </footer>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Analyzing...</div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
